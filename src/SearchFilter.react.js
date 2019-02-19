@@ -203,7 +203,7 @@ class SearchFilterParent extends Component {
               element.value = data.value.value;
               element.selectedOperator = data.selectedOperator;
             } else if (data.type === 'filtervalue'){
-              element.selectedValue = data.value.value;
+              element.selectedValue = data.value;
             }
           }
     });
@@ -299,11 +299,13 @@ class FilterContainerElement extends Component {
     this.setState({selectedFilter: filter});  
  }
 
-  handleChangeValue = _.debounce((value) =>{
+  handleChangeValue = (event) =>{
+    var value = event.currentTarget.value;
+
+      this.props.updateParentSelectedFiltersCollection({value: value , type: "filtervalue"}, this.state.selectedFilter, this.props.keyme);
+      this.setState({selectedValue: value}); 
     
-    this.props.updateParentSelectedFiltersCollection({value: value , type: "filtervalue"}, this.state.selectedFilter, this.props.keyme);
-    this.setState({selectedValue: value}); 
-  }, 500)
+  }
 
  componentDidUpdate(prevProps, prevState) {
       if(prevProps.selectedFilter !== this.props.selectedFilter){
@@ -467,7 +469,7 @@ class FilterContainerElement extends Component {
   return <div className='field four wide'><input {...vprops} /></div>;
   */
 
-  return (<Form.Control className='value-container-style' onChange={this.handleChangeValue} type="text" placeholder="Enter value..." />);
+  return (<Form.Control className='value-container-style' value={this.state.selectedValue} onChange={this.handleChangeValue} type="text" placeholder="Enter value..." />);
 } // end of value control to modify for this project
 
   render() {
