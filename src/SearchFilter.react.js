@@ -526,7 +526,6 @@ class SearchFilters extends Component {
   }
 
   getdatafromchild = (data)=>{
-    console.log(data);
     this.setState({collectionSelectedFilters: data});
   }
 
