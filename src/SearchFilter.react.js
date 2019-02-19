@@ -6,6 +6,7 @@ import Select from 'react-select';
 import {ButtonToolbar , Button} from 'react-bootstrap';
 import moment from 'moment';
 
+
 var filtersState = content.validfilters;
 let allGlobalFilters = [];
 
@@ -27,7 +28,6 @@ class SearchFilterParent extends Component {
         totalCollections: [],
         totalGroups: [],
         selectedCollection: [],
-        selectedFilter: {},
         selectedOperator: '',
         selectedFilter: '',
         selectedFiltersCollection: []
@@ -265,6 +265,7 @@ class SearchFilterParent extends Component {
               break;
             case '!=':
               label = 'Does not equal'
+              break;
             default:
               label = 'Equals'
             }
@@ -293,7 +294,6 @@ class SearchFilterParent extends Component {
      var collection = this.state.selectedFiltersCollection;
 
       collection.splice(key,1);
-      console.log(collection);
       this.setState({selectedFiltersCollection: collection});
     
    }
@@ -352,9 +352,9 @@ class SearchFilterParent extends Component {
         if(this.state.selectedFiltersCollection.length > 0){
           var propsFilterContainerArrayElements = {
             alphgroup: this.state.alphgroup,
-            selectedOperator: this.state.selectedOperator,
-            optionsFilter: optionsFilter,
+            
             optionsForOperator: this.optionsForOperator,
+            optionsFilter: optionsFilter,
             selectedFilter: this.state.selectedFilter,
             handleChangeOperator: this.handleChangeOperator,
             handleFilterChange1: this.handleFilterChange1,
@@ -362,9 +362,9 @@ class SearchFilterParent extends Component {
             removeFilter: this.removeFilter
           }
 
-          _.each(this.state.selectedFiltersCollection,(element,key)=>{
+          _.each(this.state.selectedFiltersCollection,(element,i)=>{
               propsFilterContainerArrayElements.selectedFilter = element;
-              filterContainerArray.push(<FilterContainerElement key={key} keyme={key} {...propsFilterContainerArrayElements} />);
+              filterContainerArray.push(<FilterContainerElement key={element.value.filtername +  i} keyme={i} {...propsFilterContainerArrayElements} />);
           });
         } 
           
@@ -386,7 +386,7 @@ class SearchFilterParent extends Component {
               <span> {this.state.totalCollections[3] ? this.state.totalCollections[3].length : null} Filters</span>
               <span> {this.state.totalCollections[4] ? this.state.totalCollections[4].length : null} Filters</span>
           </div>
-          <p className='p-info2'>2. Select filter/s, operator and value </p>
+          <p className='p-info2'>2. Select filter, operator and value </p>
           {filterContainerArray}
           
           <div className='selectcontainer-initial'>
@@ -411,8 +411,15 @@ class FilterContainerElement extends Component {
 
     this.state = {
       selectedOperator: '',
-      selectedFilter: this.props.selectedFilter
+      selectedFilter: this.props.selectedFilter,
+      optionsOperator: []
     }
+  }
+ 
+
+  componentDidMount(){
+    var optionsOperator = this.props.optionsForOperator(this.state.selectedFilter);
+    this.setState({ optionsOperator: optionsOperator});
   }
 
   handleChangeOperator = (operator) => {
@@ -423,14 +430,18 @@ class FilterContainerElement extends Component {
     this.setState({selectedFilter: filter});  
  }
 
- componentDidUpdate(prevProps) {
+ componentDidUpdate(prevProps, prevState) {
       if(prevProps.selectedFilter !== this.props.selectedFilter){
-        this.setState({selectedFilter: this.props.selectedFilter});
+        this.setState({selectedFilter: this.props.selectedFilter},function(){
+          var  optionsOperator = this.props.optionsForOperator(this.state.selectedFilter);
+
+          this.setState({optionsOperator: optionsOperator});
+        });
       }
  }  
 
   render() {
-    var optionsOperator = this.props.optionsForOperator(this.props.selectedFilter);
+
 
      return (
      <React.Fragment>
@@ -444,14 +455,14 @@ class FilterContainerElement extends Component {
         options={this.props.optionsFilter}
      />
 
-     {Object.keys(this.props.selectedFilter).length > 0 && <Select className='operators' isSearchable 
+     {this.state.selectedFilter && <Select className='operators' isSearchable 
         placeholder='Operators'
         value={this.state.selectedOperator}
         onChange={this.handleChangeOperator}
-        options={optionsOperator}
+        options={this.state.optionsOperator}
       />}
 
-      {Object.keys(this.props.selectedOperator).length > 0 && this.props.getValueControl() }
+      {this.state.selectedOperator && this.props.getValueControl() }
       <Button variant="outline-danger" size="sm"  className='x-button' value={this.props.keyme} onClick={ this.props.removeFilter }>X</Button>
     </div>
    </React.Fragment>);
@@ -470,6 +481,10 @@ class SearchFilters extends Component {
     };
   }
 
+  search = ()=>{
+
+  }
+
   componentDidMount() {
     this.setState({globalfilters: allGlobalFilters});
   }
@@ -480,6 +495,7 @@ class SearchFilters extends Component {
       <div className="main-container">
           <div className='header'> Search Filter TOCC Api v2 </div>
           <SearchFilterParent globalfilters={this.state.globalfilters} />
+          <Button variant="outline-primary"  className='search-button' value={''} onClick={ this.search }>Initiate Search</Button>
       </div>
     );
   }
