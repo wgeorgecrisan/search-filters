@@ -347,6 +347,7 @@ class SearchFilterParent extends Component {
    }
 
    updateParentSelectedFiltersCollection = (data, parent, keyme)=>{
+     //use !!!! to update the value filter also
      var dataToUpdate = this.state.selectedFiltersCollection;
     _.map(dataToUpdate, (element,key)=>{
           if(key === keyme && element.label === parent.label) {
