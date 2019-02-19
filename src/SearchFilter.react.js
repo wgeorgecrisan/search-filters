@@ -357,6 +357,8 @@ class SearchFilterParent extends Component {
               element.label = data.value.label;
               element.value = data.value.value;
               element.selectedOperator = data.selectedOperator;
+            } else if (data.type === 'filtervalue'){
+              
             }
           }
     });
