@@ -4,6 +4,7 @@ import content from './contentfromv2.json';
 import _ from 'underscore';
 import Select from 'react-select';
 import {ButtonToolbar , Button} from 'react-bootstrap';
+import moment from 'moment';
 
 var filtersState = content.validfilters;
 let allGlobalFilters = [];
@@ -16,7 +17,7 @@ _.map(filtersState,(element,key)=>{
 
 
 
-class SelectList extends Component {
+class SearchFilterParent extends Component {
    constructor(props){
       super(props);
       this.state = {
@@ -27,12 +28,14 @@ class SelectList extends Component {
         totalGroups: [],
         selectedCollection: [],
         selectedFilter: {},
-        selectedOperator: ''
-        
+        selectedOperator: '',
+        selectedFilter: '',
+        selectedFiltersCollection: []
       }
+
       this.optionsForOperator = this.optionsForOperator.bind(this);
       this.optionsForFilter1 = this.optionsForFilter1.bind(this);
-      this.handleFilter1 = this.handleFilter1.bind(this);
+      this.handleFilterChange1 = this.handleFilterChange1.bind(this);
       this.generateCharGroup = this.generateCharGroup.bind(this);
    }
 
@@ -80,6 +83,156 @@ class SelectList extends Component {
    }
 
 
+  // function to work on 
+  getValueControl = () => {
+    /*
+    var defaultValue = this.props.value;
+    if (defaultValue && this.state.operator) {
+      if (defaultValue[0] === this.state.operator || this.state.operator === '!=' && defaultValue[0] === '!') {
+        // remove leading * or ^ or !
+        defaultValue = defaultValue.substring(1);
+      } else if (this.state.operator === '/') {
+        // range
+        defaultValue = defaultValue.split('/', 2);
+        var defaultValueFrom = defaultValue[0];
+        var defaultValueTo = defaultValue[1];
+      }
+    }
+
+    if (this.isDate()) {
+      if (this.state.operator == '/') { // between
+        // if any of the default values are a string like 'today' or 'tomorrow', don't use a DateInput
+        if (!(defaultValueFrom && !moment(defaultValueFrom).isValid() || defaultValueTo && !moment(defaultValueTo).isValid())) {
+          return [
+            <div className='field two wide' key={ 0 }><DateInput type={ this.getType() } freeForm={ this.state.freeForm } ref='valuefrom' defaultValue={ defaultValueFrom } /></div>,
+            <div className='field two wide' key={ 1 }><DateInput type={ this.getType() } freeForm={ this.state.freeForm } ref='valueto' defaultValue={ defaultValueTo } /></div>,
+          ];
+        }
+      }
+      if (this.state.operator != '|' && !(defaultValue && !moment(defaultValue).isValid())) { // not 'in'
+        return <div className='field four wide'><DateInput type={ this.getType() } freeForm={ this.state.freeForm } ref='value' defaultValue={ defaultValue } /></div>;
+      }
+    }
+
+    var type = 'text';
+    var pl = 'Enter value...';
+    if (this.isBool()) {
+      type = 'checkbox';
+    } else if (this.isNumber()) {
+      type = 'number';
+    }
+
+    if (this.state.operator == '/' && !this.isBool()) {
+      return [
+        <div className='field two wide' key={ 0 }><input type={ type } ref='valuefrom' placeholder='from' defaultValue={ defaultValueFrom } /></div>,
+        <div className='field two wide' key={ 1 }><input type={ type } ref='valueto' placeholder='to' defaultValue={ defaultValueTo } /></div>,
+      ];
+    }
+    if (this.state.operator == '=' || this.state.operator == '!=') {
+      var select = this._getSelectFromProps(this.props);
+
+      if (select) {
+        if (['customer', 'owner', 'supplier'].indexOf(select.toLowerCase()) > -1) {
+          var vprops = {
+            ref: 'value',
+            objectKey: select.toLowerCase().slice(0, 1).toUpperCase() + select.toLowerCase().slice(1),
+            defaultValue: defaultValue
+          };
+
+          // special bodge for finding agency managed properties (where an agency is a supplier)
+          if (this.props.filter.indexOf('activesupplierid') > -1) {
+            return [
+              <div className='field two wide' key={ 0 }>
+                <FilterSelectionModal.GlobalSearchSelectField {...vprops} />
+              </div>,
+              <div className='field two wide' key={ 1 }>
+                <AgencySelectList ref='supplieragency' defaultValue={ defaultValue } formField={ false } emptyOption />
+              </div>
+            ];
+          }
+
+          return (
+            <div className='field four wide'>
+              <FilterSelectionModal.GlobalSearchSelectField {...vprops} />
+            </div>
+          );
+        }
+
+        if (select.toLowerCase() === 'groupingvalue') {
+          return (
+            <div className='field four wide'>
+              <BasicGroupingValueSelectList ref='value' formField={ false } />
+            </div>
+          );
+        }
+
+        if (select.toLowerCase() === 'grouping') {
+          return (
+            <div className='field four wide'>
+              <GroupingSelectList ref='value' formField={ false } />
+            </div>
+          );
+        }        
+
+        if (select.toLowerCase() === 'office') {
+          return (
+            <div className='field four wide'>
+              <OfficeSelectList ref='value' formField={ false } />
+            </div>
+          );
+        }
+
+        if (select.toLowerCase() === 'tabsuser') {
+          vprops = {
+            type: 'text',
+            ref: 'value',
+            placeholder: pl,
+          };
+          return <div className='field four wide'><input {...vprops} /></div>;
+        }        
+
+        vprops = {
+          ref: 'value',
+          defaultValue: defaultValue,
+          entityType: select,
+          optionValue: 'id'
+        };
+        return <div className='field four wide'><FilterSelectionModal.SelectList {...vprops} /></div>;
+      }
+
+      if (this.props.filter === 'changedaytemplatetype') {
+        return (
+          <div className='field four wide'>
+            <select ref='value' defaultValue={ defaultValue }>
+              <option>Base</option>
+              <option>Branding</option>
+              <option>Property</option>
+            </select>
+          </div>
+        );
+      }
+    }
+
+    if (this.state.operator == '|') {
+      type = 'text';
+      pl = 'Enter values separated by the pipe (|) symbol...';
+    }
+
+    vprops = {
+      type: type,
+      ref: 'value',
+      placeholder: pl,
+    };
+
+    if (this.isBool()) {
+      vprops.defaultChecked = defaultValue;
+    } else {
+      vprops.defaultValue = defaultValue;
+    }
+
+    return <div className='field four wide'><input {...vprops} /></div>;
+    */
+  } // end of value control
 
    optionsForOperator(selectedObject) {
       let options = [];
@@ -131,9 +284,25 @@ class SelectList extends Component {
     return options;
    }
 
-   handleFilter1(selectedOption) {
-      if(selectedOption !== null)
-        this.setState({selectedFilter: selectedOption});
+   removeFilter = (event)=> {
+     event.preventDefault();
+     let key = event.currentTarget.value;
+     var collection = this.state.selectedFiltersCollection;
+
+      collection.splice(key,1);
+      console.log(collection);
+      this.setState({selectedFiltersCollection: collection});
+    
+   }
+
+   handleFilterChange1(selectedOption) {
+      var selectedFiltersCollection = this.state.selectedFiltersCollection;
+
+      if(selectedOption !== null){
+        selectedFiltersCollection.push(selectedOption);
+        this.setState({selectedFilter: {} , selectedFiltersCollection: selectedFiltersCollection});
+      }
+        
       else 
         this.setState({selectedFilter: {}});  
    }
@@ -174,10 +343,28 @@ class SelectList extends Component {
    }
 
    render () {
-      //let options = this.optionsForFilterType();
-      let optionsFilter = this.optionsForFilter1(this.state.selectedCollection),
-          optionsOperator = this.optionsForOperator(this.state.selectedFilter);
-      
+      let optionsFilter = this.optionsForFilter1(this.state.selectedCollection);
+      var filterContainerArray = [];
+        
+        if(this.state.selectedFiltersCollection.length > 0){
+          var propsFilterContainerArrayElements = {
+            alphgroup: this.state.alphgroup,
+            selectedOperator: this.state.selectedOperator,
+            optionsFilter: optionsFilter,
+            optionsForOperator: this.optionsForOperator,
+            selectedFilter: this.state.selectedFilter,
+            handleChangeOperator: this.handleChangeOperator,
+            handleFilterChange1: this.handleFilterChange1,
+            getValueControl: this.getValueControl,
+            removeFilter: this.removeFilter
+          }
+
+          _.each(this.state.selectedFiltersCollection,(element,key)=>{
+              propsFilterContainerArrayElements.selectedFilter = element;
+              filterContainerArray.push(<FilterContainerElement key={key} keyme={key} {...propsFilterContainerArrayElements} />);
+          });
+        } 
+          
 
        return (
         <React.Fragment>
@@ -196,39 +383,75 @@ class SelectList extends Component {
               <span> {this.state.totalCollections[3] ? this.state.totalCollections[3].length : null} Filters</span>
               <span> {this.state.totalCollections[4] ? this.state.totalCollections[4].length : null} Filters</span>
           </div>
-          <p className='p-info2'>2. Select filter, operator and value </p>
-          <div className='selectcontainer'>
-
-            <Select className='beautify' autoFocus
-               isSearchable isDisabled={this.state.alphgroup > 0 ? false : true } isClearable
+          <p className='p-info2'>2. Select filter/s, operator and value </p>
+          {filterContainerArray}
+          
+          <div className='selectcontainer-initial'>
+             <div className='new-filter'> Add new filter</div>
+            <Select className='beautify'
+              isSearchable isDisabled={this.state.alphgroup > 0 ? false : true } isClearable
               placeholder='Type to search ... '
-              value={this.state.filterType}
-              onChange={this.handleFilter1}
+              value={Object.keys(this.state.selectedFilter).length > 0 ? this.state.selectedFilter : ''}
+              onChange={this.handleFilterChange1}
               options={optionsFilter}
             />
-   
-            {Object.keys(this.state.selectedFilter).length > 0 && <Select className='operators' isSearchable 
-              placeholder='Operators'
-              value={this.state.selectedOperator}
-              onChange={this.handleChangeOperator}
-              options={optionsOperator}
-            />}
           </div>
+
         </React.Fragment>
         );
    }
 }
 
-class Filter extends Component {
+class FilterContainerElement extends Component {
   constructor(props) {
     super(props);
 
-    this.state = {}
+    this.state = {
+      selectedOperator: '',
+      selectedFilter: this.props.selectedFilter
+    }
   }
 
+  handleChangeOperator = (operator) => {
+    this.setState({selectedOperator: operator});  
+  }
+
+  handleChangeFilter = (filter) => {
+    this.setState({selectedFilter: filter});  
+ }
+
+ componentDidUpdate(prevProps) {
+      if(prevProps.selectedFilter !== this.props.selectedFilter){
+        this.setState({selectedFilter: this.props.selectedFilter});
+      }
+ }  
 
   render() {
-     return (<div>'I am an filter individual' </div>);
+    var optionsOperator = this.props.optionsForOperator(this.props.selectedFilter);
+
+     return (
+     <React.Fragment>
+      
+      <div className='selectcontainer new-div'>
+      <Select className='beautify'
+        isSearchable isDisabled={this.props.alphgroup > 0 ? false : true } isClearable={false}
+        placeholder='Type to search ... '
+        value={this.state.selectedFilter}
+        onChange={this.handleChangeFilter}
+        options={this.props.optionsFilter}
+     />
+
+     {Object.keys(this.props.selectedFilter).length > 0 && <Select className='operators' isSearchable 
+        placeholder='Operators'
+        value={this.state.selectedOperator}
+        onChange={this.handleChangeOperator}
+        options={optionsOperator}
+      />}
+
+      {Object.keys(this.props.selectedOperator).length > 0 && this.props.getValueControl() }
+      <Button variant="outline-danger" size="sm"  className='x-button' value={this.props.keyme} onClick={ this.props.removeFilter }>X</Button>
+    </div>
+   </React.Fragment>);
   } 
 }
 
@@ -240,7 +463,7 @@ class SearchFilters extends Component {
 
     this.state = {
       globalfilters: [],
-      selectedfilters: []
+      selectedFiltersQueryString: ''
     };
   }
 
@@ -253,7 +476,7 @@ class SearchFilters extends Component {
       
       <div className="main-container">
           <div className='header'> Search Filter TOCC Api v2 </div>
-          <SelectList globalfilters={this.state.globalfilters} />
+          <SearchFilterParent globalfilters={this.state.globalfilters} />
       </div>
     );
   }
