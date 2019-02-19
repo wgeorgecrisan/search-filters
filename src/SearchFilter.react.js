@@ -351,7 +351,13 @@ class SearchFilterParent extends Component {
      var dataToUpdate = this.state.selectedFiltersCollection;
     _.map(dataToUpdate, (element,key)=>{
           if(key === keyme && element.label === parent.label) {
-            element.selectedOperator = data;
+            if(data.type === 'operator'){
+              element.selectedOperator = data.value;
+            } else if (data.type === 'entity') {
+              element.label = data.value.label;
+              element.value = data.value.value;
+              element.selectedOperator = data.selectedOperator;
+            }
           }
     });
 
@@ -436,11 +442,12 @@ class FilterContainerElement extends Component {
   }
 
   handleChangeOperator = (operator) => {
-    this.props.updateParentSelectedFiltersCollection(operator, this.state.selectedFilter,this.props.keyme);
+    this.props.updateParentSelectedFiltersCollection({value: operator , type: "operator"}, this.state.selectedFilter,this.props.keyme);
     this.setState({selectedOperator: operator});  
   }
 
   handleChangeFilter = (filter) => {
+    this.props.updateParentSelectedFiltersCollection({value: filter , type: "entity"}, this.state.selectedFilter,this.props.keyme);
     this.setState({selectedFilter: filter});  
  }
 
