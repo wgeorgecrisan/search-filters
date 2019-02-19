@@ -302,6 +302,7 @@ class SearchFilterParent extends Component {
       var selectedFiltersCollection = this.state.selectedFiltersCollection;
 
       if(selectedOption !== null){
+        selectedOption.selectedOperator = '';
         selectedFiltersCollection.push(selectedOption);
         this.setState({selectedFilter: {} , selectedFiltersCollection: selectedFiltersCollection});
       }
@@ -345,6 +346,17 @@ class SearchFilterParent extends Component {
     this.setState({ alphgroup: nr , selectedCollection: this.state.totalCollections[nr - 1]});
    }
 
+   updateParentSelectedFiltersCollection = (data, parent, keyme)=>{
+     var dataToUpdate = this.state.selectedFiltersCollection;
+    _.map(dataToUpdate, (element,key)=>{
+          if(key === keyme && element.label === parent.label) {
+            element.selectedOperator = data;
+          }
+    });
+
+    this.setState({selectedFiltersCollection: dataToUpdate});
+   }
+
    render () {
       let optionsFilter = this.optionsForFilter1(this.state.selectedCollection);
       var filterContainerArray = [];
@@ -352,7 +364,7 @@ class SearchFilterParent extends Component {
         if(this.state.selectedFiltersCollection.length > 0){
           var propsFilterContainerArrayElements = {
             alphgroup: this.state.alphgroup,
-            
+            updateParentSelectedFiltersCollection: this.updateParentSelectedFiltersCollection,
             optionsForOperator: this.optionsForOperator,
             optionsFilter: optionsFilter,
             selectedFilter: this.state.selectedFilter,
@@ -410,7 +422,7 @@ class FilterContainerElement extends Component {
     super(props);
 
     this.state = {
-      selectedOperator: '',
+      selectedOperator: this.props.selectedFilter.selectedOperator,
       selectedFilter: this.props.selectedFilter,
       optionsOperator: []
     }
@@ -423,6 +435,7 @@ class FilterContainerElement extends Component {
   }
 
   handleChangeOperator = (operator) => {
+    this.props.updateParentSelectedFiltersCollection(operator, this.state.selectedFilter,this.props.keyme);
     this.setState({selectedOperator: operator});  
   }
 
@@ -432,7 +445,7 @@ class FilterContainerElement extends Component {
 
  componentDidUpdate(prevProps, prevState) {
       if(prevProps.selectedFilter !== this.props.selectedFilter){
-        this.setState({selectedFilter: this.props.selectedFilter},function(){
+        this.setState({selectedFilter: this.props.selectedFilter , selectedOperator: this.props.selectedFilter.selectedOperator },function(){
           var  optionsOperator = this.props.optionsForOperator(this.state.selectedFilter);
 
           this.setState({optionsOperator: optionsOperator});
