@@ -83,7 +83,7 @@ class SearchFilterParent extends Component {
    }
 
 
-  // function to work on 
+  // function to modify for this project, borrowed from TAB2
   getValueControl = () => {
     /*
     var defaultValue = this.props.value;
@@ -232,7 +232,7 @@ class SearchFilterParent extends Component {
 
     return <div className='field four wide'><input {...vprops} /></div>;
     */
-  } // end of value control
+  } // end of value control to modify for this project
 
    optionsForOperator(selectedObject) {
       let options = [];
@@ -254,6 +254,9 @@ class SearchFilterParent extends Component {
             case '~':
               label = 'Contains';
               break;
+            case '^':
+              label = 'Unknown***';
+              break;  
             case '*':
               label = 'Starts with';
               break;
