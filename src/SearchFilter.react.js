@@ -3,7 +3,7 @@ import './App.sass';
 import content from './contentfromv2.json';
 import _ from 'underscore';
 import Select from 'react-select';
-import {ButtonToolbar , Button} from 'react-bootstrap';
+import {ButtonToolbar , Button , Form} from 'react-bootstrap';
 import moment from 'moment';
 
 
@@ -28,7 +28,6 @@ class SearchFilterParent extends Component {
         totalCollections: [],
         totalGroups: [],
         selectedCollection: [],
-        selectedOperator: '',
         selectedFilter: '',
         selectedFiltersCollection: []
       }
@@ -82,157 +81,6 @@ class SearchFilterParent extends Component {
        }
    }
 
-
-  // function to modify for this project, borrowed from TAB2
-  getValueControl = () => {
-    /*
-    var defaultValue = this.props.value;
-    if (defaultValue && this.state.operator) {
-      if (defaultValue[0] === this.state.operator || this.state.operator === '!=' && defaultValue[0] === '!') {
-        // remove leading * or ^ or !
-        defaultValue = defaultValue.substring(1);
-      } else if (this.state.operator === '/') {
-        // range
-        defaultValue = defaultValue.split('/', 2);
-        var defaultValueFrom = defaultValue[0];
-        var defaultValueTo = defaultValue[1];
-      }
-    }
-
-    if (this.isDate()) {
-      if (this.state.operator == '/') { // between
-        // if any of the default values are a string like 'today' or 'tomorrow', don't use a DateInput
-        if (!(defaultValueFrom && !moment(defaultValueFrom).isValid() || defaultValueTo && !moment(defaultValueTo).isValid())) {
-          return [
-            <div className='field two wide' key={ 0 }><DateInput type={ this.getType() } freeForm={ this.state.freeForm } ref='valuefrom' defaultValue={ defaultValueFrom } /></div>,
-            <div className='field two wide' key={ 1 }><DateInput type={ this.getType() } freeForm={ this.state.freeForm } ref='valueto' defaultValue={ defaultValueTo } /></div>,
-          ];
-        }
-      }
-      if (this.state.operator != '|' && !(defaultValue && !moment(defaultValue).isValid())) { // not 'in'
-        return <div className='field four wide'><DateInput type={ this.getType() } freeForm={ this.state.freeForm } ref='value' defaultValue={ defaultValue } /></div>;
-      }
-    }
-
-    var type = 'text';
-    var pl = 'Enter value...';
-    if (this.isBool()) {
-      type = 'checkbox';
-    } else if (this.isNumber()) {
-      type = 'number';
-    }
-
-    if (this.state.operator == '/' && !this.isBool()) {
-      return [
-        <div className='field two wide' key={ 0 }><input type={ type } ref='valuefrom' placeholder='from' defaultValue={ defaultValueFrom } /></div>,
-        <div className='field two wide' key={ 1 }><input type={ type } ref='valueto' placeholder='to' defaultValue={ defaultValueTo } /></div>,
-      ];
-    }
-    if (this.state.operator == '=' || this.state.operator == '!=') {
-      var select = this._getSelectFromProps(this.props);
-
-      if (select) {
-        if (['customer', 'owner', 'supplier'].indexOf(select.toLowerCase()) > -1) {
-          var vprops = {
-            ref: 'value',
-            objectKey: select.toLowerCase().slice(0, 1).toUpperCase() + select.toLowerCase().slice(1),
-            defaultValue: defaultValue
-          };
-
-          // special bodge for finding agency managed properties (where an agency is a supplier)
-          if (this.props.filter.indexOf('activesupplierid') > -1) {
-            return [
-              <div className='field two wide' key={ 0 }>
-                <FilterSelectionModal.GlobalSearchSelectField {...vprops} />
-              </div>,
-              <div className='field two wide' key={ 1 }>
-                <AgencySelectList ref='supplieragency' defaultValue={ defaultValue } formField={ false } emptyOption />
-              </div>
-            ];
-          }
-
-          return (
-            <div className='field four wide'>
-              <FilterSelectionModal.GlobalSearchSelectField {...vprops} />
-            </div>
-          );
-        }
-
-        if (select.toLowerCase() === 'groupingvalue') {
-          return (
-            <div className='field four wide'>
-              <BasicGroupingValueSelectList ref='value' formField={ false } />
-            </div>
-          );
-        }
-
-        if (select.toLowerCase() === 'grouping') {
-          return (
-            <div className='field four wide'>
-              <GroupingSelectList ref='value' formField={ false } />
-            </div>
-          );
-        }        
-
-        if (select.toLowerCase() === 'office') {
-          return (
-            <div className='field four wide'>
-              <OfficeSelectList ref='value' formField={ false } />
-            </div>
-          );
-        }
-
-        if (select.toLowerCase() === 'tabsuser') {
-          vprops = {
-            type: 'text',
-            ref: 'value',
-            placeholder: pl,
-          };
-          return <div className='field four wide'><input {...vprops} /></div>;
-        }        
-
-        vprops = {
-          ref: 'value',
-          defaultValue: defaultValue,
-          entityType: select,
-          optionValue: 'id'
-        };
-        return <div className='field four wide'><FilterSelectionModal.SelectList {...vprops} /></div>;
-      }
-
-      if (this.props.filter === 'changedaytemplatetype') {
-        return (
-          <div className='field four wide'>
-            <select ref='value' defaultValue={ defaultValue }>
-              <option>Base</option>
-              <option>Branding</option>
-              <option>Property</option>
-            </select>
-          </div>
-        );
-      }
-    }
-
-    if (this.state.operator == '|') {
-      type = 'text';
-      pl = 'Enter values separated by the pipe (|) symbol...';
-    }
-
-    vprops = {
-      type: type,
-      ref: 'value',
-      placeholder: pl,
-    };
-
-    if (this.isBool()) {
-      vprops.defaultChecked = defaultValue;
-    } else {
-      vprops.defaultValue = defaultValue;
-    }
-
-    return <div className='field four wide'><input {...vprops} /></div>;
-    */
-  } // end of value control to modify for this project
 
    optionsForOperator(selectedObject) {
       let options = [];
@@ -303,16 +151,13 @@ class SearchFilterParent extends Component {
 
       if(selectedOption !== null){
         selectedOption.selectedOperator = '';
+        selectedOption.selectedValue = '';
         selectedFiltersCollection.push(selectedOption);
         this.setState({selectedFilter: {} , selectedFiltersCollection: selectedFiltersCollection});
       }
         
       else 
         this.setState({selectedFilter: {}});  
-   }
-
-   handleChangeOperator = (operator) => {
-      this.setState({selectedOperator: operator});  
    }
 
    generateCharGroup(char1,char2){
@@ -358,7 +203,7 @@ class SearchFilterParent extends Component {
               element.value = data.value.value;
               element.selectedOperator = data.selectedOperator;
             } else if (data.type === 'filtervalue'){
-              
+              element.selectedValue = data.value.value;
             }
           }
     });
@@ -379,7 +224,7 @@ class SearchFilterParent extends Component {
             selectedFilter: this.state.selectedFilter,
             handleChangeOperator: this.handleChangeOperator,
             handleFilterChange1: this.handleFilterChange1,
-            getValueControl: this.getValueControl,
+            getFilterValue: this.getFilterValue,
             removeFilter: this.removeFilter
           }
 
@@ -433,6 +278,7 @@ class FilterContainerElement extends Component {
     this.state = {
       selectedOperator: this.props.selectedFilter.selectedOperator,
       selectedFilter: this.props.selectedFilter,
+      selectedValue: this.props.selectedFilter.selectedValue,
       optionsOperator: []
     }
   }
@@ -453,6 +299,12 @@ class FilterContainerElement extends Component {
     this.setState({selectedFilter: filter});  
  }
 
+  handleChangeValue = _.debounce((value) =>{
+    
+    this.props.updateParentSelectedFiltersCollection({value: value , type: "filtervalue"}, this.state.selectedFilter, this.props.keyme);
+    this.setState({selectedValue: value}); 
+  }, 500)
+
  componentDidUpdate(prevProps, prevState) {
       if(prevProps.selectedFilter !== this.props.selectedFilter){
         this.setState({selectedFilter: this.props.selectedFilter , selectedOperator: this.props.selectedFilter.selectedOperator },function(){
@@ -462,6 +314,161 @@ class FilterContainerElement extends Component {
         });
       }
  }  
+
+ // function to modify for this project, borrowed from TAB2
+ getFilterValue = () => {
+    
+  let defaultValue = this.state.selectedValue;
+
+  /*
+  if (defaultValue) {
+    if (defaultValue[0] === this.state.operator || this.state.operator === '!=' && defaultValue[0] === '!') {
+      // remove leading * or ^ or !
+      defaultValue = defaultValue.substring(1);
+    } else if (this.state.operator === '/') {
+      // range
+      defaultValue = defaultValue.split('/', 2);
+      var defaultValueFrom = defaultValue[0];
+      var defaultValueTo = defaultValue[1];
+    }
+  }
+
+  if (this.isDate()) {
+    if (this.state.operator == '/') { // between
+      // if any of the default values are a string like 'today' or 'tomorrow', don't use a DateInput
+      if (!(defaultValueFrom && !moment(defaultValueFrom).isValid() || defaultValueTo && !moment(defaultValueTo).isValid())) {
+        return [
+          <div className='field two wide' key={ 0 }><DateInput type={ this.getType() } freeForm={ this.state.freeForm } ref='valuefrom' defaultValue={ defaultValueFrom } /></div>,
+          <div className='field two wide' key={ 1 }><DateInput type={ this.getType() } freeForm={ this.state.freeForm } ref='valueto' defaultValue={ defaultValueTo } /></div>,
+        ];
+      }
+    }
+    if (this.state.operator != '|' && !(defaultValue && !moment(defaultValue).isValid())) { // not 'in'
+      return <div className='field four wide'><DateInput type={ this.getType() } freeForm={ this.state.freeForm } ref='value' defaultValue={ defaultValue } /></div>;
+    }
+  }
+
+  var type = 'text';
+  var pl = 'Enter value...';
+  if (this.isBool()) {
+    type = 'checkbox';
+  } else if (this.isNumber()) {
+    type = 'number';
+  }
+
+  if (this.state.operator == '/' && !this.isBool()) {
+    return [
+      <div className='field two wide' key={ 0 }><input type={ type } ref='valuefrom' placeholder='from' defaultValue={ defaultValueFrom } /></div>,
+      <div className='field two wide' key={ 1 }><input type={ type } ref='valueto' placeholder='to' defaultValue={ defaultValueTo } /></div>,
+    ];
+  }
+  if (this.state.operator == '=' || this.state.operator == '!=') {
+    var select = this._getSelectFromProps(this.props);
+
+    if (select) {
+      if (['customer', 'owner', 'supplier'].indexOf(select.toLowerCase()) > -1) {
+        var vprops = {
+          ref: 'value',
+          objectKey: select.toLowerCase().slice(0, 1).toUpperCase() + select.toLowerCase().slice(1),
+          defaultValue: defaultValue
+        };
+
+        // special bodge for finding agency managed properties (where an agency is a supplier)
+        if (this.props.filter.indexOf('activesupplierid') > -1) {
+          return [
+            <div className='field two wide' key={ 0 }>
+              <FilterSelectionModal.GlobalSearchSelectField {...vprops} />
+            </div>,
+            <div className='field two wide' key={ 1 }>
+              <AgencySelectList ref='supplieragency' defaultValue={ defaultValue } formField={ false } emptyOption />
+            </div>
+          ];
+        }
+
+        return (
+          <div className='field four wide'>
+            <FilterSelectionModal.GlobalSearchSelectField {...vprops} />
+          </div>
+        );
+      }
+
+      if (select.toLowerCase() === 'groupingvalue') {
+        return (
+          <div className='field four wide'>
+            <BasicGroupingValueSelectList ref='value' formField={ false } />
+          </div>
+        );
+      }
+
+      if (select.toLowerCase() === 'grouping') {
+        return (
+          <div className='field four wide'>
+            <GroupingSelectList ref='value' formField={ false } />
+          </div>
+        );
+      }        
+
+      if (select.toLowerCase() === 'office') {
+        return (
+          <div className='field four wide'>
+            <OfficeSelectList ref='value' formField={ false } />
+          </div>
+        );
+      }
+
+      if (select.toLowerCase() === 'tabsuser') {
+        vprops = {
+          type: 'text',
+          ref: 'value',
+          placeholder: pl,
+        };
+        return <div className='field four wide'><input {...vprops} /></div>;
+      }        
+
+      vprops = {
+        ref: 'value',
+        defaultValue: defaultValue,
+        entityType: select,
+        optionValue: 'id'
+      };
+      return <div className='field four wide'><FilterSelectionModal.SelectList {...vprops} /></div>;
+    }
+
+    if (this.props.filter === 'changedaytemplatetype') {
+      return (
+        <div className='field four wide'>
+          <select ref='value' defaultValue={ defaultValue }>
+            <option>Base</option>
+            <option>Branding</option>
+            <option>Property</option>
+          </select>
+        </div>
+      );
+    }
+  }
+
+  if (this.state.operator == '|') {
+    type = 'text';
+    pl = 'Enter values separated by the pipe (|) symbol...';
+  }
+
+  vprops = {
+    type: type,
+    ref: 'value',
+    placeholder: pl,
+  };
+
+  if (this.isBool()) {
+    vprops.defaultChecked = defaultValue;
+  } else {
+    vprops.defaultValue = defaultValue;
+  }
+
+  return <div className='field four wide'><input {...vprops} /></div>;
+  */
+
+  return (<Form.Control className='value-container-style' onChange={this.handleChangeValue} type="text" placeholder="Enter value..." />);
+} // end of value control to modify for this project
 
   render() {
 
@@ -485,7 +492,7 @@ class FilterContainerElement extends Component {
         options={this.state.optionsOperator}
       />}
 
-      {this.state.selectedOperator && this.props.getValueControl() }
+      {this.state.selectedOperator && this.getFilterValue() }
       <Button variant="outline-danger" size="sm"  className='x-button' value={this.props.keyme} onClick={ this.props.removeFilter }>X</Button>
     </div>
    </React.Fragment>);
