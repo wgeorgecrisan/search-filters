@@ -540,7 +540,7 @@ class SearchFilters extends Component {
           <div className='header'> Search Filter TOCC Api v2 </div>
           <SearchFilterParent getdatafromchild={this.getdatafromchild} globalfilters={this.state.globalfilters} />
           <Button variant="outline-primary"  className='search-button' value={''} onClick={ this.search }>Initiate Search</Button>
-          <div className='final-string'>{this.state.selectedFiltersQueryString}</div>
+          <div className='final-string'>{this.state.selectedFiltersQueryString}<p> filter = name  = operator = value  </p></div>
       </div>
     );
   }
