@@ -207,7 +207,8 @@ class SearchFilterParent extends Component {
             }
           }
     });
-
+    
+    this.props.getdatafromchild(dataToUpdate);
     this.setState({selectedFiltersCollection: dataToUpdate});
    }
 
@@ -509,12 +510,24 @@ class SearchFilters extends Component {
 
     this.state = {
       globalfilters: [],
-      selectedFiltersQueryString: ''
+      selectedFiltersQueryString: '',
+      collectionSelectedFilters: []
     };
   }
 
   search = ()=>{
+    let theExpectedString = '', dataforqs = this.state.collectionSelectedFilters;
 
+      _.each(dataforqs,(elm,key)=>{
+        theExpectedString += 'filter=' + elm.value.filtername + '=' + elm.selectedOperator.value + elm.selectedValue + '&';
+      });
+ 
+      this.setState({selectedFiltersQueryString: theExpectedString});
+  }
+
+  getdatafromchild = (data)=>{
+    console.log(data);
+    this.setState({collectionSelectedFilters: data});
   }
 
   componentDidMount() {
@@ -526,8 +539,9 @@ class SearchFilters extends Component {
       
       <div className="main-container">
           <div className='header'> Search Filter TOCC Api v2 </div>
-          <SearchFilterParent globalfilters={this.state.globalfilters} />
+          <SearchFilterParent getdatafromchild={this.getdatafromchild} globalfilters={this.state.globalfilters} />
           <Button variant="outline-primary"  className='search-button' value={''} onClick={ this.search }>Initiate Search</Button>
+          <div className='final-string'>{this.state.selectedFiltersQueryString}</div>
       </div>
     );
   }
