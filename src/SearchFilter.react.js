@@ -254,7 +254,7 @@ class FilterContainerElement extends Component {
       dateState = {from: new Date() , to: moment().format('YYYY-MM-DD HH:mm:ss')};
     }
 
-    dateState.from = moment(date).format('YYYY-MM-DD HH:mm:ss');
+    dateState.from = moment(date, 'YYYYMMDD HHmmss').format('YYYY-MM-DD HH:mm:ss');
 
     this.setState({selectedValue: dateState},()=>{
       this.props.updateParentSelectedFiltersCollection({value: this.state.selectedValue, type: "filtervalue"}, this.state.selectedFilter, this.props.keyme, true);
@@ -282,7 +282,7 @@ class FilterContainerElement extends Component {
       dateState = {from: moment().format('YYYY-MM-DD HH:mm:ss') , to: new Date()};
     }
 
-    dateState.to = moment(date).format('YYYY-MM-DD HH:mm:ss');
+    dateState.to = moment(date,'YYYYMMDD HHmmss').format('YYYY-MM-DD HH:mm:ss');
 
     this.setState({selectedValue: dateState}, ()=>{
       this.props.updateParentSelectedFiltersCollection({value: this.state.selectedValue, type: "filtervalue"}, this.state.selectedFilter, this.props.keyme, true);
@@ -323,7 +323,7 @@ class FilterContainerElement extends Component {
   }
 
   handleChangeValueDateDT = (date) =>{
-    var value = moment(date).format('YYYY-MM-DD HH:mm:ss');
+    var value = moment(date,'YYYYMMDD HHmmss').format('YYYY-MM-DD HH:mm:ss');
       this.props.updateParentSelectedFiltersCollection({value: value , type: "filtervalue"}, this.state.selectedFilter, this.props.keyme);
       this.setState({selectedValue: value});  
   }
