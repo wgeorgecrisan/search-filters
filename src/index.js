@@ -9,9 +9,9 @@ import * as serviceWorker from './serviceWorker';
  * @type string
  * You need to add a category to prop 'category' as a string 
  * 
- * possible values: 'actor' , 'actorpayment' , 'booking' , 'booking service' , 'contact',
- *                 'document', 'entity', 'note', 'property', 'sagepaypayment', 'specialoffer',
- *                  'ticket', 'transaction', 'workorder', 'workordersupplier';                  
+ * possible values: 'actor' , 'actorpayment' , 'booking' , 'booking service' , 'contact', 'note',
+ *                  'document', 'entity', 'property', 'sagepaypayment', 'specialoffer', 'ticket',
+ *                  'transaction', 'workorder', 'workordersupplier';                  
  */
 
 ReactDOM.render(<SearchFilter category='property' />, document.getElementById('root'));

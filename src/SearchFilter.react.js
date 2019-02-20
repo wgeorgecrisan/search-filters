@@ -33,9 +33,7 @@ class SearchFilterParent extends Component {
 
    componentDidUpdate(prevProps){
        if(prevProps.globalfilters !== this.props.globalfilters){
-          this.setState({globalfilters: this.props.globalfilters},function(){
-            this.divideOnGroups(this.state.globalfilters);
-          });
+          this.setState({globalfilters: this.props.globalfilters});
        }
    }
 
