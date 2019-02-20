@@ -438,11 +438,11 @@ class SearchFilters extends Component {
 
       _.each(dataforqs,(elm,key)=>{
 
-        theExpectedString += 'filter=' + elm.value.filtername + '=' + elm.selectedOperator.value;
+        theExpectedString += 'filter=' + elm.value.filtername + '=' + (elm.selectedOperator.value || '');
           if(typeof elm.selectedValue === 'object'){
             theExpectedString += elm.selectedValue.from + '/' + elm.selectedValue.to + '&';
           } else {
-            theExpectedString +=  elm.selectedValue + '&';
+            theExpectedString +=  (elm.selectedValue || '') + '&';
           }
       });
  
