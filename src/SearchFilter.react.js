@@ -3,21 +3,13 @@ import './App.sass';
 import content from './contentfromv2.json';
 import _ from 'underscore';
 import Select from 'react-select';
-import {ButtonToolbar , Button , Form} from 'react-bootstrap';
+import { Button , Form} from 'react-bootstrap';
 import moment from 'moment';
 import DatePicker from 'react-datepicker';
+import PropTypes from 'prop-types'; 
 import "react-datepicker/dist/react-datepicker.css";
 
-var filtersState = content.validfilters;
-let allGlobalFilters = [];
-
-_.map(filtersState,(element,key)=>{
-        _.each(element,(element, filter)=>{
-          allGlobalFilters.push({filtername: filter, options: element});
-        });
-});
-
-
+var filtersStateFromJson = content.validfilters;
 
 class SearchFilterParent extends Component {
    constructor(props){
@@ -36,39 +28,8 @@ class SearchFilterParent extends Component {
       this.optionsForOperator = this.optionsForOperator.bind(this);
       this.optionsForFilter1 = this.optionsForFilter1.bind(this);
       this.handleFilterChange1 = this.handleFilterChange1.bind(this);
-      this.generateCharGroup = this.generateCharGroup.bind(this);
    }
 
-
-   divideOnGroups = (content)=>{
-    var group1 = this.getGroups(1), group2 = this.getGroups(2) , group3 = this.getGroups(3), group4 = this.getGroups(4) , group5 = this.getGroups(5);
-    var collection1 = [],  collection2 = [], collection3 = [] ,collection4 = [], collection5 = [];
-
-    _.each(this.state.globalfilters,(element,key)=>{
-        var char = element.filtername.charCodeAt(0);
-        char = String.fromCharCode(char).toUpperCase();
-        
-        if(group1.includes(char)){
-            collection1.push(element);
-        } else if (group2.includes(char)) {
-          collection2.push(element);
-        } else if (group3.includes(char)) {
-          collection3.push(element);
-        } else if (group4.includes(char)) {
-          collection4.push(element);
-        } else if (group5.includes(char)) {
-          collection5.push(element);
-        }
-
-        if(key === this.state.globalfilters.length -1){
-          var totalGroups = [group1, group2 ,group3 , group4, group5];
-          var totalCollections = [collection1, collection2, collection3, collection4, collection5];
-          this.setState({totalCollections: totalCollections, totalGroups: totalGroups});
-        }
-    });
-     
-    
-   }
 
    componentDidUpdate(prevProps){
        if(prevProps.globalfilters !== this.props.globalfilters){
@@ -100,7 +61,7 @@ class SearchFilterParent extends Component {
               label = 'Contains';
               break;
             case '^':
-              label = 'Unknown***';
+              label = 'And(Ignore this operator)';
               break;  
             case '*':
               label = 'Starts with';
@@ -166,31 +127,6 @@ class SearchFilterParent extends Component {
         this.setState({selectedFilter: {}});  
    }
 
-   generateCharGroup(char1,char2){
-        let a = [], i = char1.charCodeAt(0), j = char2.charCodeAt(0);
-        while(i <= j){
-            a.push(String.fromCharCode(i));
-            i++;
-        }
-        return a;
-   }
-
-   getGroups(group) {
-        switch(group){
-          case 1: 
-            return this.generateCharGroup("A","E");
-          case 2: 
-            return this.generateCharGroup("F","J"); 
-          case 3: 
-            return this.generateCharGroup("K","O"); 
-          case 4: 
-            return this.generateCharGroup("P","T");
-          case 5: 
-            return this.generateCharGroup("U","Z");  
-          default:
-            return [];   
-        }
-   }
 
    handleButtonClick = (event)=> {
       var nr = event.target.value;
@@ -198,7 +134,6 @@ class SearchFilterParent extends Component {
    }
 
    updateParentSelectedFiltersCollection = (data, parent, keyme)=>{
-     //use !!!! to update the value filter also
      var dataToUpdate = this.state.selectedFiltersCollection;
     _.map(dataToUpdate, (element,key)=>{
           if(key === keyme && element.label === parent.label) {
@@ -219,7 +154,7 @@ class SearchFilterParent extends Component {
    }
 
    render () {
-      let optionsFilter = this.optionsForFilter1(this.state.selectedCollection);
+      let optionsFilter = this.optionsForFilter1(this.state.globalfilters);
       var filterContainerArray = [];
         
         if(this.state.selectedFiltersCollection.length > 0){
@@ -244,28 +179,16 @@ class SearchFilterParent extends Component {
 
        return (
         <React.Fragment>
-          <p className='p-info'>1. Select alphabethical group of filters </p>
-          <ButtonToolbar>
-            <Button variant="outline-secondary" size="sm" active={this.state.alphgroup === '1' ? true : false} className='g-button' value={1} onClick={ this.handleButtonClick  }>A to... E</Button>
-            <Button variant="outline-secondary" size="sm" active={this.state.alphgroup === '2' ? true : false} className='g-button' value={2}  onClick={ this.handleButtonClick }>F to... J</Button>
-            <Button variant="outline-secondary" size="sm" active={this.state.alphgroup === '3' ? true : false} className='g-button' value={3} onClick={ this.handleButtonClick }>K to... O</Button>
-            <Button variant="outline-secondary" size="sm" active={this.state.alphgroup === '4' ? true : false} className='g-button' value={4}  onClick={ this.handleButtonClick }>P to... T</Button>
-            <Button variant="outline-secondary" size="sm" active={this.state.alphgroup === '5' ? true : false} className='g-button' value={5} onClick={ this.handleButtonClick }>U to... Z</Button>
-          </ButtonToolbar>
+
           <div className='infos'>
-              <span> {this.state.totalCollections[0] ? this.state.totalCollections[0].length : null} Filters</span>
-              <span> {this.state.totalCollections[1] ? this.state.totalCollections[1].length : null} Filters</span>
-              <span> {this.state.totalCollections[2] ? this.state.totalCollections[2].length : null} Filters</span>
-              <span> {this.state.totalCollections[3] ? this.state.totalCollections[3].length : null} Filters</span>
-              <span> {this.state.totalCollections[4] ? this.state.totalCollections[4].length : null} Filters</span>
+              <span> {this.state.globalfilters ? this.state.globalfilters.length : null} Filters for category <span> {this.props.category }</span> </span>
           </div>
-          <p className='p-info2'>2. Select filter, operator and value </p>
           {filterContainerArray}
           
           <div className='selectcontainer-initial'>
              <div className='new-filter'> Add new filter</div>
             <Select className='beautify'
-              isSearchable isDisabled={this.state.alphgroup > 0 ? false : true } isClearable
+              isSearchable isDisabled={false } isClearable
               placeholder='Type to search ... '
               value={Object.keys(this.state.selectedFilter).length > 0 ? this.state.selectedFilter : ''}
               onChange={this.handleFilterChange1}
@@ -337,7 +260,7 @@ class FilterContainerElement extends Component {
  
  getFilterValue = () => {
     
-  let defaultValue = this.state.selectedValue, currentFilterState = this.state.selectedFilter;
+  let defaultValue = this.state.selectedValue, currentFilterState = this.state.selectedFilter, currentOperator = this.state.selectedOperator;
 
   
 
@@ -368,7 +291,7 @@ class FilterContainerElement extends Component {
       
       <div className='selectcontainer new-div'>
       <Select className='beautify'
-        isSearchable isDisabled={this.props.alphgroup > 0 ? false : true } isClearable={false}
+        isSearchable isDisabled={ false } isClearable={false}
         placeholder='Type to search ... '
         value={this.state.selectedFilter}
         onChange={this.handleChangeFilter}
@@ -396,11 +319,16 @@ class SearchFilters extends Component {
     super(props);
 
     this.state = {
-      globalfilters: [],
+      localfilters: [],
       selectedFiltersQueryString: '',
-      collectionSelectedFilters: []
+      collectionSelectedFilters: [],
+      loadedCategories: [],
+      categorySelected: this.props.category || false,  //required prop to work
+      globalfilters: false
     };
   }
+
+  
 
   search = ()=>{
     let theExpectedString = '', dataforqs = this.state.collectionSelectedFilters;
@@ -417,7 +345,24 @@ class SearchFilters extends Component {
   }
 
   componentDidMount() {
-    this.setState({globalfilters: allGlobalFilters});
+    this.loadAllFilters();
+  }
+  
+  loadAllFilters = () => {
+
+      let allFiltersByCategory = filtersStateFromJson; // loaded valid filters from json file
+      
+      this.setState({ globalfilters: allFiltersByCategory }, ()=>{
+
+              if(this.props.category){
+                  let localfiltersarray = [];
+                  let localfilters = this.state.globalfilters[this.props.category];
+                  _.each(localfilters, (element, filter) => {
+                    localfiltersarray.push({filtername: filter, options: element});
+                  });                
+                this.setState({localfilters: localfiltersarray})
+              }
+      });  
   }
 
   render() {
@@ -425,7 +370,7 @@ class SearchFilters extends Component {
       
       <div className="main-container">
           <div className='header'> Search Filter TOCC Api v2 </div>
-          <SearchFilterParent getdatafromchild={this.getdatafromchild} globalfilters={this.state.globalfilters} />
+          <SearchFilterParent getdatafromchild={this.getdatafromchild} category={this.props.category} globalfilters={this.state.localfilters} />
           <Button variant="outline-primary"  className='search-button' value={''} onClick={ this.search }>Initiate Search</Button>
           <div className='final-string'>{this.state.selectedFiltersQueryString}<p> filter = name  = operator = value  </p></div>
       </div>
@@ -433,7 +378,9 @@ class SearchFilters extends Component {
   }
 }
 
-
+SearchFilters.propTypes = {
+  category: PropTypes.string.isRequired
+}
 
 
 export default SearchFilters;
