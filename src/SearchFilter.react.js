@@ -497,15 +497,17 @@ class SearchFilters extends Component {
 
       _.each(dataforqs,(elm,key)=>{
 
-        theExpectedString += 'filter=' + elm.value.filtername + '=' + (elm.selectedOperator.value || '');
+        theExpectedString += 'filter=' + elm.value.filtername; 
           if(typeof elm.selectedValue === 'object'){
             theExpectedString += elm.selectedValue.from + '/' + elm.selectedValue.to + '&';
           } else {
-            theExpectedString +=  (elm.selectedValue || '') + '&';
+            theExpectedString +=  '=' + (elm.selectedOperator.value || '') + (elm.selectedValue || '') + '&';
           }
       });
  
-      this.setState({selectedFiltersQueryString: theExpectedString});
+      this.setState({selectedFiltersQueryString: theExpectedString},()=>{
+        this.props.callbackProp(this.state.selectedFiltersQueryString);
+      });
   }
 
   getdatafromchild = (data)=>{
@@ -538,7 +540,7 @@ class SearchFilters extends Component {
       
       <div className="main-container">
           <div className='header'> Search Filter TOCC Api v2 </div>
-          <SearchFilterParent getdatafromchild={this.getdatafromchild} category={this.props.category} globalfilters={this.state.localfilters} />
+          <SearchFilterParent getdatafromchild={this.getdatafromchild} callbackProp={this.props.callbackProp} category={this.props.category} globalfilters={this.state.localfilters} />
           <Button variant="outline-primary"  className='search-button' value={''} onClick={ this.search }>Initiate Search</Button>
           <div className='final-string'>{this.state.selectedFiltersQueryString}<p> filter = name  = operator = value  </p></div>
       </div>
@@ -547,7 +549,8 @@ class SearchFilters extends Component {
 }
 
 SearchFilters.propTypes = {
-  category: PropTypes.string.isRequired
+  category: PropTypes.string.isRequired,
+  callbackProp: PropTypes.func.isRequired
 }
 
 

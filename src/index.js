@@ -14,7 +14,9 @@ import * as serviceWorker from './serviceWorker';
  *                  'transaction', 'workorder', 'workordersupplier';                  
  */
 
-ReactDOM.render(<SearchFilter category='property' />, document.getElementById('root'));
+ReactDOM.render(<SearchFilter callbackProp={(args)=>{
+    console.log(args);
+}} category='property' />, document.getElementById('root'));
 
 
 
