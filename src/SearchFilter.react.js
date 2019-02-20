@@ -116,7 +116,7 @@ class SearchFilterParent extends Component {
         } else if( selectedOption.value.options.type === 'number') {
           selectedOption.selectedValue = 0;
         } else if (selectedOption.value.options.type === 'datetime'){
-          selectedOption.selectedValue = moment().format('YYYY-MM-DD HH-mm-ss');
+          selectedOption.selectedValue = moment().format('YYYY-MM-DD HH:mm:ss');
         }
 
         selectedFiltersCollection.push(selectedOption);
@@ -251,10 +251,10 @@ class FilterContainerElement extends Component {
     var dateState = this.state.selectedValue;
 
     if(typeof dateState !== 'object') {
-      dateState = {from: new Date() , to: moment().format('YYYY-MM-DD hh-mm-ss')};
+      dateState = {from: new Date() , to: moment().format('YYYY-MM-DD HH:mm:ss')};
     }
 
-    dateState.from = moment(date).format('YYYY-MM-DD hh-mm-ss');
+    dateState.from = moment(date).format('YYYY-MM-DD HH:mm:ss');
 
     this.setState({selectedValue: dateState},()=>{
       this.props.updateParentSelectedFiltersCollection({value: this.state.selectedValue, type: "filtervalue"}, this.state.selectedFilter, this.props.keyme, true);
@@ -279,10 +279,10 @@ class FilterContainerElement extends Component {
     var dateState = this.state.selectedValue;
 
     if(typeof dateState !== 'object') {
-      dateState = {from: moment().format('YYYY-MM-DD hh-mm-ss') , to: new Date()};
+      dateState = {from: moment().format('YYYY-MM-DD HH:mm:ss') , to: new Date()};
     }
 
-    dateState.to = moment(date).format('YYYY-MM-DD hh-mm-ss');
+    dateState.to = moment(date).format('YYYY-MM-DD HH:mm:ss');
 
     this.setState({selectedValue: dateState}, ()=>{
       this.props.updateParentSelectedFiltersCollection({value: this.state.selectedValue, type: "filtervalue"}, this.state.selectedFilter, this.props.keyme, true);
@@ -323,7 +323,7 @@ class FilterContainerElement extends Component {
   }
 
   handleChangeValueDateDT = (date) =>{
-    var value = moment(date).format('YYYY-MM-DD hh-mm-ss');
+    var value = moment(date).format('YYYY-MM-DD HH:mm:ss');
       this.props.updateParentSelectedFiltersCollection({value: value , type: "filtervalue"}, this.state.selectedFilter, this.props.keyme);
       this.setState({selectedValue: value});  
   }
