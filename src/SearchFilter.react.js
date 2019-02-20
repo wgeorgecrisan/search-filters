@@ -499,7 +499,7 @@ class SearchFilters extends Component {
 
         theExpectedString += 'filter=' + elm.value.filtername; 
           if(typeof elm.selectedValue === 'object'){
-            theExpectedString += elm.selectedValue.from + '/' + elm.selectedValue.to + '&';
+            theExpectedString += '=' + elm.selectedValue.from + '/' + elm.selectedValue.to + '&';
           } else {
             theExpectedString +=  '=' + (elm.selectedOperator.value || '') + (elm.selectedValue || '') + '&';
           }
