@@ -131,7 +131,7 @@ class SearchFilterParent extends Component {
     this.setState({ alphgroup: nr , selectedCollection: this.state.totalCollections[nr - 1]});
    }
 
-   updateParentSelectedFiltersCollection = (data, parent, keyme)=>{
+   updateParentSelectedFiltersCollection = (data, parent, keyme, multiple)=>{
      var dataToUpdate = this.state.selectedFiltersCollection;
     _.map(dataToUpdate, (element,key)=>{
           if(key === keyme && element.label === parent.label) {
@@ -142,7 +142,7 @@ class SearchFilterParent extends Component {
               element.value = data.value.value;
               element.selectedOperator = data.selectedOperator;
             } else if (data.type === 'filtervalue'){
-              element.selectedValue = data.value;
+                element.selectedValue = data.value;
             }
           }
     });
@@ -177,12 +177,7 @@ class SearchFilterParent extends Component {
 
        return (
         <React.Fragment>
-
-          <div className='infos'>
-              <span> {this.state.globalfilters ? this.state.globalfilters.length : null} Filters for category <span> {this.props.category }</span> </span>
-          </div>
-          {filterContainerArray}
-          
+          {filterContainerArray}  
           <div className='selectcontainer-initial'>
              <div className='new-filter'> Add new filter</div>
             <Select className='beautify'
@@ -192,6 +187,9 @@ class SearchFilterParent extends Component {
               onChange={this.handleFilterChange1}
               options={optionsFilter}
             />
+            <div className='infos'>
+              <span> {this.state.globalfilters ? this.state.globalfilters.length : null} Filters for category: <span> {String(this.props.category).toUpperCase() }</span> </span>
+            </div>
           </div>
 
         </React.Fragment>
@@ -207,10 +205,59 @@ class FilterContainerElement extends Component {
       selectedOperator: this.props.selectedFilter.selectedOperator,
       selectedFilter: this.props.selectedFilter,
       selectedValue: this.props.selectedFilter.selectedValue,
-      optionsOperator: []
+      optionsOperator: [],
     }
+
   }
  
+  handleChangeValueFromTo = (event) => {
+      
+    let type = this.state.selectedFilter.value.options.type;
+
+      if( type === 'number' || type === 'string') {
+        if(event.currentTarget.attributes.position.value === 'first'){
+
+           this.setState({selectedValue: { from: event.currentTarget.value , to: this.state.selectedValue.to || '' }},()=>{
+            this.props.updateParentSelectedFiltersCollection({value: this.state.selectedValue, type: "filtervalue"}, this.state.selectedFilter, this.props.keyme, true);
+           });
+
+        } else if (event.currentTarget.attributes.position.value === 'second') {
+
+          this.setState({selectedValue: {  to: event.currentTarget.value , from: this.state.selectedValue.from || '' }},()=>{
+            this.props.updateParentSelectedFiltersCollection({value: this.state.selectedValue, type: "filtervalue"}, this.state.selectedFilter, this.props.keyme, true);
+          });
+
+        }
+      } 
+  }
+
+  handleChangeStart = (date) => {
+      var dateState = this.state.selectedValue;
+
+      if(typeof dateState !== 'object') {
+        dateState = {from: new Date() , to: new Date()};
+      }
+
+      dateState.from = moment(date).format('YYYY-MM-DD');
+
+      this.setState({selectedValue: dateState},()=>{
+        this.props.updateParentSelectedFiltersCollection({value: this.state.selectedValue, type: "filtervalue"}, this.state.selectedFilter, this.props.keyme, true);
+      });
+  }
+
+  handleChangeEnd = (date) => {
+    var dateState = this.state.selectedValue;
+
+    if(typeof dateState !== 'object') {
+      dateState = {from: new Date() , to: new Date()};
+    }
+
+    dateState.to = moment(date).format('YYYY-MM-DD');
+
+    this.setState({selectedValue: dateState}, ()=>{
+      this.props.updateParentSelectedFiltersCollection({value: this.state.selectedValue, type: "filtervalue"}, this.state.selectedFilter, this.props.keyme, true);
+    });
+  }
 
   componentDidMount(){
     var optionsOperator = this.props.optionsForOperator(this.state.selectedFilter);
@@ -219,7 +266,7 @@ class FilterContainerElement extends Component {
 
   handleChangeOperator = (operator) => {
     this.props.updateParentSelectedFiltersCollection({value: operator , type: "operator"}, this.state.selectedFilter,this.props.keyme);
-    this.setState({selectedOperator: operator});  
+    this.setState({selectedOperator: operator });  
   }
 
   handleChangeFilter = (filter) => {
@@ -258,20 +305,78 @@ class FilterContainerElement extends Component {
  
  getFilterValue = () => {
     
-  let defaultValue = this.state.selectedValue, currentFilterState = this.state.selectedFilter, currentOperator = this.state.selectedOperator;
-
-  
+  let defaultValue = this.state.selectedValue, currentFilterState = this.state.selectedFilter, currentOperator = this.state.selectedOperator.value;
 
   switch(currentFilterState.value.options.type){
     case 'date':
       var selectValue = moment(defaultValue).toDate();
-      return ( <DatePicker selected={ selectValue } className='date-picker-style' dateFormat="YYYY-MM-d"  onChange={ this.handleChangeValueDate } />);
+      if (currentOperator === "/") {
+        if(typeof this.state.selectedValue !== 'object'){
+          selectValue = {from: new Date() , to: new Date()};
+              return ( 
+                <React.Fragment>  
+                  <DatePicker selected={ selectValue.from } selectsStart className='date-picker-style'   dateFormat="yyyy/MM/dd" re onChange={ this.handleChangeStart } />
+                    {<span className='between'> {" to " }</span>}
+                  <DatePicker selected={ selectValue.to } selectsEnd className='date-picker-style date-picker-style2'   dateFormat="yyyy/MM/dd"  onChange={ this.handleChangeEnd } />
+              </React.Fragment> );
+         } else {
+          return ( 
+            <React.Fragment>  
+              <DatePicker selected={ moment(this.state.selectedValue.from).toDate() } selectsStart startDate={moment(this.state.selectedValue.from).toDate()}  endDate={moment(this.state.selectedValue.to).toDate()} className='date-picker-style'  dateFormat="yyyy/MM/dd" re onChange={ this.handleChangeStart } />
+                {<span className='between'> {" to " }</span>}
+              <DatePicker selected={moment(this.state.selectedValue.to).toDate() } selectsEnd startDate={moment(this.state.selectedValue.from).toDate()} endDate={moment(this.state.selectedValue.to).toDate()} className='date-picker-style date-picker-style2'   dateFormat="yyyy/MM/dd"  onChange={ this.handleChangeEnd } />
+          </React.Fragment> ); 
+         }
+        
+      } else {
+        return ( <DatePicker selected={ selectValue } className='date-picker-style' dateFormat="yyyy/MM/dd"  onChange={ this.handleChangeValueDate } />);
+      }
     case 'boolean':
       return (<Form.Check type="checkbox" className='checkbox-style' checked={ defaultValue }  onChange={ this.handleChangeValueCheckbox } label="True/False" />) 
     case 'string':
+    if (currentOperator === "/") {
+       if(typeof this.state.selectedValue !== 'object'){
+        defaultValue = {from: '' , to: ''};
+          return (
+            <React.Fragment> 
+              <Form.Control className='value-container-style'  position={'first'} value={ defaultValue.from } onChange={this.handleChangeValueFromTo} type="text" placeholder="Enter value from (string)..." />
+                {<span className='between'> {" to " }</span>}
+              <Form.Control className='value-container-style value-container-style2' position={'second'}  value={ defaultValue.to } onChange={this.handleChangeValueFromTo} type="text" placeholder="Enter value to (string)..." />
+            </React.Fragment>);
+       } else {
+        return (
+          <React.Fragment> 
+            <Form.Control className='value-container-style' position={'first'}  value={ defaultValue.from } onChange={this.handleChangeValueFromTo} type="text" placeholder="Enter value from (string)..." />
+              {<span className='between'> {" to " }</span>}
+            <Form.Control className='value-container-style value-container-style2' position={'second'}   value={ defaultValue.to } onChange={this.handleChangeValueFromTo} type="text" placeholder="Enter value to (string)..." />
+          </React.Fragment>);
+       }
+    } else {
       return (<Form.Control className='value-container-style' value={ defaultValue } onChange={this.handleChangeValue} type="text" placeholder="Enter value (string)..." />);  
+    }   
     case 'number':
-      return (<Form.Control className='value-container-style' value={ defaultValue } onChange={this.handleChangeValue} type="number" placeholder="Enter value type (number)..." />);
+      if (currentOperator === "/") {
+       if(typeof this.state.selectedValue !== 'object'){
+         defaultValue = {from: '' , to: ''};
+          return (
+            <React.Fragment> 
+              <Form.Control className='value-container-style' position={'first'}   value={ defaultValue.from } onChange={this.handleChangeValueFromTo} type="number" placeholder="Enter value from (number)..." />
+                {<span className='between'> {" to " }</span>}
+              <Form.Control className='value-container-style value-container-style2' position={'second'}   value={ defaultValue.to } onChange={this.handleChangeValueFromTo} type="number" placeholder="Enter value to (number)..." />
+            </React.Fragment>);
+         
+       } else {
+        return (
+          <React.Fragment> 
+            <Form.Control className='value-container-style'  position={'first'}  value={ defaultValue.from } onChange={this.handleChangeValueFromTo} type="number" placeholder="Enter value from (number)..." />
+              {<span className='between'> {" to " }</span>}
+            <Form.Control className='value-container-style value-container-style2' position={'second'}  value={ defaultValue.to } onChange={this.handleChangeValueFromTo} type="number" placeholder="Enter value to (number)..." />
+          </React.Fragment>);
+       }
+      } else {
+        return (<Form.Control className='value-container-style' value={ defaultValue } onChange={this.handleChangeValue} type="number" placeholder="Enter value type (number)..." />);
+      }
+    
     default:
       return (<Form.Control className='value-container-style' value={ defaultValue } onChange={this.handleChangeValue} type="text" placeholder="Enter value ..." />);
     }
@@ -332,7 +437,13 @@ class SearchFilters extends Component {
     let theExpectedString = '', dataforqs = this.state.collectionSelectedFilters;
 
       _.each(dataforqs,(elm,key)=>{
-        theExpectedString += 'filter=' + elm.value.filtername + '=' + elm.selectedOperator.value + elm.selectedValue + '&';
+
+        theExpectedString += 'filter=' + elm.value.filtername + '=' + elm.selectedOperator.value;
+          if(typeof elm.selectValue === 'object'){
+            theExpectedString += elm.selectValue.from + '/' + elm.selectValue.to + '&'
+          } else {
+            theExpectedString +=  elm.selectedValue + '&';
+          }
       });
  
       this.setState({selectedFiltersQueryString: theExpectedString});
