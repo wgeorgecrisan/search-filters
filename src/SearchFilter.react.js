@@ -235,7 +235,7 @@ class FilterContainerElement extends Component {
       var dateState = this.state.selectedValue;
 
       if(typeof dateState !== 'object') {
-        dateState = {from: new Date() , to: new Date()};
+        dateState = {from: new Date() , to: moment().format('YYYY-MM-DD')};
       }
 
       dateState.from = moment(date).format('YYYY-MM-DD');
@@ -249,7 +249,7 @@ class FilterContainerElement extends Component {
     var dateState = this.state.selectedValue;
 
     if(typeof dateState !== 'object') {
-      dateState = {from: new Date() , to: new Date()};
+      dateState = {from: moment().format('YYYY-MM-DD') , to: new Date()};
     }
 
     dateState.to = moment(date).format('YYYY-MM-DD');
@@ -439,8 +439,8 @@ class SearchFilters extends Component {
       _.each(dataforqs,(elm,key)=>{
 
         theExpectedString += 'filter=' + elm.value.filtername + '=' + elm.selectedOperator.value;
-          if(typeof elm.selectValue === 'object'){
-            theExpectedString += elm.selectValue.from + '/' + elm.selectValue.to + '&'
+          if(typeof elm.selectedValue === 'object'){
+            theExpectedString += elm.selectedValue.from + '/' + elm.selectedValue.to + '&';
           } else {
             theExpectedString +=  elm.selectedValue + '&';
           }
