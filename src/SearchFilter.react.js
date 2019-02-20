@@ -115,6 +115,8 @@ class SearchFilterParent extends Component {
           selectedOption.selectedValue = false;
         } else if( selectedOption.value.options.type === 'number') {
           selectedOption.selectedValue = 0;
+        } else if (selectedOption.value.options.type === 'datetime'){
+          selectedOption.selectedValue = moment().format('YYYY-MM-DD HH-mm-ss');
         }
 
         selectedFiltersCollection.push(selectedOption);
@@ -245,6 +247,20 @@ class FilterContainerElement extends Component {
       });
   }
 
+  handleChangeStartDT = (date) => {
+    var dateState = this.state.selectedValue;
+
+    if(typeof dateState !== 'object') {
+      dateState = {from: new Date() , to: moment().format('YYYY-MM-DD hh-mm-ss')};
+    }
+
+    dateState.from = moment(date).format('YYYY-MM-DD hh-mm-ss');
+
+    this.setState({selectedValue: dateState},()=>{
+      this.props.updateParentSelectedFiltersCollection({value: this.state.selectedValue, type: "filtervalue"}, this.state.selectedFilter, this.props.keyme, true);
+    });
+}
+
   handleChangeEnd = (date) => {
     var dateState = this.state.selectedValue;
 
@@ -253,6 +269,20 @@ class FilterContainerElement extends Component {
     }
 
     dateState.to = moment(date).format('YYYY-MM-DD');
+
+    this.setState({selectedValue: dateState}, ()=>{
+      this.props.updateParentSelectedFiltersCollection({value: this.state.selectedValue, type: "filtervalue"}, this.state.selectedFilter, this.props.keyme, true);
+    });
+  }
+
+  handleChangeEndDT = (date) => {
+    var dateState = this.state.selectedValue;
+
+    if(typeof dateState !== 'object') {
+      dateState = {from: moment().format('YYYY-MM-DD hh-mm-ss') , to: new Date()};
+    }
+
+    dateState.to = moment(date).format('YYYY-MM-DD hh-mm-ss');
 
     this.setState({selectedValue: dateState}, ()=>{
       this.props.updateParentSelectedFiltersCollection({value: this.state.selectedValue, type: "filtervalue"}, this.state.selectedFilter, this.props.keyme, true);
@@ -292,6 +322,12 @@ class FilterContainerElement extends Component {
       this.setState({selectedValue: value});  
   }
 
+  handleChangeValueDateDT = (date) =>{
+    var value = moment(date).format('YYYY-MM-DD hh-mm-ss');
+      this.props.updateParentSelectedFiltersCollection({value: value , type: "filtervalue"}, this.state.selectedFilter, this.props.keyme);
+      this.setState({selectedValue: value});  
+  }
+
  componentDidUpdate(prevProps, prevState) {
       if(prevProps.selectedFilter !== this.props.selectedFilter){
         this.setState({selectedFilter: this.props.selectedFilter , selectedOperator: this.props.selectedFilter.selectedOperator },function(){
@@ -308,6 +344,29 @@ class FilterContainerElement extends Component {
   let defaultValue = this.state.selectedValue, currentFilterState = this.state.selectedFilter, currentOperator = this.state.selectedOperator.value;
 
   switch(currentFilterState.value.options.type){
+    case 'datetime':
+      var selectValueDT = moment(defaultValue).toDate();
+      if (currentOperator === "/") {
+        if(typeof this.state.selectedValue !== 'object'){
+          selectValueDT = {from: new Date() , to: new Date()};
+              return ( 
+                <React.Fragment>  
+                  <DatePicker selected={ selectValueDT.from } selectsStart showTimeSelect className='date-picker-style'   dateFormat="yyyy/MMMM/d h:mm aa" re onChange={ this.handleChangeStartDT } />
+                    {<span className='between'> {" to " }</span>}
+                  <DatePicker selected={ selectValueDT.to } selectsEnd showTimeSelect className='date-picker-style date-picker-style2'   dateFormat="yyyy/MMMM/d h:mm aa"  onChange={ this.handleChangeEndDT } />
+              </React.Fragment> );
+         } else {
+          return ( 
+            <React.Fragment>  
+              <DatePicker selected={ moment(this.state.selectedValue.from).toDate() } showTimeSelect selectsStart startDate={moment(this.state.selectedValue.from).toDate()}  endDate={moment(this.state.selectedValue.to).toDate()} className='date-picker-style'  dateFormat="yyyy/MMMM/d h:mm aa" re onChange={ this.handleChangeStartDT } />
+                {<span className='between'> {" to " }</span>}
+              <DatePicker selected={moment(this.state.selectedValue.to).toDate() } showTimeSelect  selectsEnd startDate={moment(this.state.selectedValue.from).toDate()} endDate={moment(this.state.selectedValue.to).toDate()} className='date-picker-style date-picker-style2'   dateFormat="yyyy/MMMM/d h:mm aa"  onChange={ this.handleChangeEndDT } />
+          </React.Fragment> ); 
+         }
+        
+      } else {
+        return ( <DatePicker selected={ selectValueDT } showTimeSelect className='date-picker-style' dateFormat="yyyy/MMMM/d h:mm aa"  onChange={ this.handleChangeValueDateDT } />);
+      }
     case 'date':
       var selectValue = moment(defaultValue).toDate();
       if (currentOperator === "/") {
